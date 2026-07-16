@@ -40,8 +40,7 @@ app.get("/chats/new", (req, res) => {
 });
 
 //Create Route
-app.post("/chats", async (req, res, next) => {
-    try {
+app.post("/chats", asyncWrap (async (req, res, next) => {
         let {from, to, msg} = req.body;
         let newChat = new Chat({
         from: from,
@@ -52,13 +51,8 @@ app.post("/chats", async (req, res, next) => {
 
      await newChat.save();
      res.redirect("/chats")
-    } catch (err) {
-        next(err);
-    }
-
-});
-    
-    
+  })
+);
     
    
 let chat1 = new Chat({
@@ -72,9 +66,15 @@ chat1.save().then((res) => {
     console.log(res);
 });
 
+function asyncWrap(fn) {
+    return function (req, res, next) {
+        fn(req, res, next).catch((err) => next(err));
+    };
+}
+
 //New Show Route
-app.get("/chats/:id", async (req, res, next) => {
-    try {
+app.get("/chats/:id", asyncWrap  (async (req, res, next) => {
+   
         let { id } = req.params;
         let chat = await Chat.findById(id);
         if(!chat) {
@@ -82,11 +82,7 @@ app.get("/chats/:id", async (req, res, next) => {
     }
      res.render("edit.ejs", { chat });
     
-    } catch (err) {
-        next(err);
-    }
-   
-});
+}));
 
 //Edit Rout
 app.get("/chats/:id/edit", async (req, res) => {
@@ -101,8 +97,7 @@ app.get("/chats/:id/edit", async (req, res) => {
 });
 
 //Update Rout
-app.put("/chats/:id", async (req, res) => {
-    try {
+app.put("/chats/:id", asyncWrap (async (req, res) => {
         let {id} = req.params;
         let { msg: newMsg} = req.body;
         console.log(newMsg);
@@ -113,27 +108,35 @@ app.put("/chats/:id", async (req, res) => {
 
             console.log(updatedChat);
             res.redirect("/chats");
-    } catch (err) {
-        next(err)
-    }
-    
-});
+        })
+);
 
 //Destroy Route
-app.delete("/chats/:id", async (req, res) => {
-    try {
+app.delete("/chats/:id", asyncWrap (async (req, res) => {
     let {id} = req.params;
     let deletedChat = await Chat.findByIdAndDelete(id); 
     console.log(deletedChat);
     res.redirect("/chats");
-    } catch (err) {
-        next(err);
-    }
     
-});
+    })
+);
 
 app.get("/", (req, res) => {
     res.send("root is working");
+});
+
+const handleValidationErr = (err) => {
+    console.log("This was a Validation error. Please follow rules");
+    console.dir(err.message);
+    return err; 
+}
+
+app.use((err, req, res, next) => {
+    console.log(err.name);
+    if(err.name === "ValidationError") {
+       err = handleValidationErr(err);   
+    }
+    next(err);
 });
 
 //Error Handling Middleware
