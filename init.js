@@ -8,7 +8,7 @@ main()
 .catch((err) => console.log(err));
 
 async function main() {
-  await mongoose.connect('mongodb://127.0.0.1:27017/whatsapp');
+  await mongoose.connect('mongodb://127.0.0.1:27017/fakewhatsapp');
 }
 
 let allChats = [
@@ -20,19 +20,19 @@ let allChats = [
     },
     {
         from: "rohit",
-        to: "moht",
+        to: "mohit",
         msg: "teach me JS callbacks",
         created_at: new Date(),
     },
     {
         from: "tony",
-        to: "moht",
+        to: "rakib",
         msg: "love you 3000",
         created_at: new Date(),
     },
     {
         from: "sakib",
-        to: "moht",
+        to: "rakib",
         msg: "hello how are you",
         created_at: new Date(),
     },
